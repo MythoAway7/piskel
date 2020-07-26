@@ -7,6 +7,7 @@
   <meta name="description" content="">
   <meta name="author" content="Julian Descottes">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
   <div
@@ -104,6 +105,56 @@
   <!--body-main-end-->
   <!-- the comment above indicates the end of the markup reused by the editor integrated in piskelapp.com -->
   <!-- do not delete, do not move :) -->
+  
+  <script>
+    
+    function myFunction() {
+  var x = document.getElementById("myDIV");
+  if (x.style.display === "none") {
+    x.style.display = "block";
+    var browserHeight = $(window).height();
+    var newheight = browserHeight - 100;
+    var theIframe = document.getElementById("iframe1");
+    x.style.height = `${newheight}px`;
+    theIframe.style.height = `${newheight}px`;
+  } else {
+    x.style.display = "none";
+  }
+}
 
+
+
+
+$(document).ready(function () {
+    $("#iframe1").hide();
+    $("#onOff").click(function (e) {
+        e.preventDefault();
+        $("#iframe1").fadeIn('slow');
+    });
+
+    $("onOff").click(function () {
+        $("#iframe1").fadeOut("slow");
+    });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </script>
+  <button onclick="myFunction()" id="onOff" style="position: absolute;right: 10px;bottom: 10px;">Show/Hide</button>
+  <div id="myDIV">
+    <iframe id="iframe1" src="http://192.168.12.109:3000/" height="0" width="600" title="Chat" style="position: absolute; right: 10px;bottom: 30px;"></iframe>
+  <!--You need to replace this IP with your own. You can change the port but if you do, you also need to on the otherserver.js file-->
+  </div>
 </body>
 </html>
