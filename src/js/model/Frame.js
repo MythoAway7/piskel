@@ -1,3 +1,5 @@
+
+
 (function () {
   var ns = $.namespace('pskl.model');
   var __idCounter = 0;
@@ -13,6 +15,11 @@
       throw 'Bad arguments in pskl.model.Frame constructor : ' + width + ', ' + height;
     }
   };
+  /*
+  socket.on('frameUpdate', function() {console.log(this)})
+  setInterval(function(){  }, 3000);
+*/
+
 
   ns.Frame.fromPixelGrid = function (pixels, width, height) {
     if (pixels.length) {
@@ -85,6 +92,8 @@
    * Copies the passed pixels into the frame.
    */
   ns.Frame.prototype.setPixels = function (pixels) {
+    //
+    console.log(pixels);
     this.pixels = this.clonePixels_(pixels);
     this.version++;
   };
@@ -107,6 +116,7 @@
   };
 
   ns.Frame.prototype.setPixel = function (x, y, color) {
+//console.log('setting pixel')
     if (this.containsPixel(x, y)) {
       var index = y * this.width + x;
       var p = this.pixels[index];
@@ -147,6 +157,25 @@
   ns.Frame.prototype.containsPixel = function (col, row) {
     return col >= 0 && row >= 0 && col < this.width && row < this.height;
   };
+/*
+  ns.Frame.prototype.frameSync = function (data) { //We replicate a function from the simplepen.js file locally
+    console.log(this);
+    console.log(data.pixels);
+    console.log(data.col)
+    console.log(frame)
+
+      data.pixels.forEach(function (pixel) {
+      //  pskl.model.Frame.prototype.setPixel(pixel.col,pixel.row,pixel.color);
+        console.log('done')
+      //  this.setPixel(pixel.col, pixel.row, pixel.color);
+        
+        
+        console.log(1)
+      });
+
+    
+ //   pskl.model.Frame.prototype.setPixelsToFrame1_()
+  }*/
 
   ns.Frame.prototype.isSameSize = function (otherFrame) {
     return this.getHeight() == otherFrame.getHeight() && this.getWidth() == otherFrame.getWidth();

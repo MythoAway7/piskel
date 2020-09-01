@@ -2,11 +2,16 @@ body {
   background: #1D1D1D;
 }
 
+.clearfix {
+  overflow: auto;
+}
 /* Browser fixes */
 ::-ms-clear {
   display: none;
 }
-
+.whitetext p{
+  color: aliceblue;
+}
 .allow-user-select {
   -webkit-touch-callout: initial;
   -webkit-user-select: initial;

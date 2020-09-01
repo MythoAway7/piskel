@@ -69,3 +69,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
+This project has been modified to allow collorboration using Socket.io .
+
+To run your own server (host) run the .bat file with nodejs installed. To end a server hit the x on the terminal that pops up.
+To connect to a server follow the in app instructions. 

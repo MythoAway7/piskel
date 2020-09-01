@@ -7,7 +7,67 @@
   <meta name="description" content="">
   <meta name="author" content="Julian Descottes">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="js/socket.io/socket.io.js"></script>
+  <link rel="stylesheet" href="css/modal/css/bootstrap.min.css">
+  <script src="js/jquery/jquery.js"></script>
+  <script src="css/modal/js/popper.js"></script>
+  <script src="css/modal/js/bootstrap.min.js"></script>
+  <script src="js/socket.io/serverJoin.js"></script>
+  <style>
+    .modal-backdrop {
+   background-color: #444444bd;}
+  </style>
+  
+   <div class="modal" tabindex="-1" role="dialog" id="exampleModal">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div id="dialog-container" class="unsupported-browser">
+          <div class="dialog-wrapper">
+            <h3 class="dialog-head">
+              Piskel Collorboration
+              <span class="dialog-close" data-dismiss="modal">X</span>
+            </h3>
+            <div class="dialog-content clearfix whitetext">
+              <p>This version of Piskel has been modified to allow multiple people to edit files at the same time</p>
+                <p>If you do not want to sync with others, select (<span id="current-user-agent">Do not Sync</span>). If you want to collorborate select (<span id="current-user-agent">Sync</span>)</p>
+                <p>This will require an active server. Full documentation how to set this up at (link)</p>
+                <p>Dismissing this box will start a normal session.</p>
+                <button style="float: right;" data-dismiss="modal"><img src="img/socket/Link.png"></button>
+                <button style="float: left;" id="SyncButton1" data-dismiss="modal" data-toggle="modal" data-target="#serverModal"><img src="img/socket/Link.png"></button>
+                <span style="float: right;padding-right: 5px;" id="current-user-agent">Do not Sync </span>
+                <span style="float: left;padding-left: 5px;" id="current-user-agent"> Sync</span>
+            </div>
+          </div>
+         </div>
+      </div>
+    </div>
+  </div>
+  <!--Server Modal-->
+  <div class="modal" tabindex="-1" role="dialog" id="serverModal">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div id="dialog-container" class="unsupported-browser">
+          <div class="dialog-wrapper">
+            <h3 class="dialog-head" id="serverHead">
+              Servers
+              <span class="dialog-close" data-dismiss="modal">X</span>
+            </h3>
+            <div class="dialog-content clearfix whitetext">
+              <p></p>
+                <p>Enter the IP and port number you want to connect to.</p>
+                <p>If you are already hosting a server enter that IP and port number.</p>
+                  <input type="text" id="connectInput" class="form-control" placeholder="ex. 192.168.0.101:3000" aria-label="Enter IP" aria-describedby="basic-addon2">
+                  <input type="submit" value="Connect" id="connectButton" style="padding-top: 10pxpx;" onclick="serverHandle()"></input>
+                <p id="dismissNotice">Dismissing this box will start a normal session.</p>
+                <input hidden type="text" id="nameInput" class="form-control" placeholder="ex. Billy, Mytho ,Sam ,etc" aria-label="Enter Name" aria-describedby="basic-addon2">
+                <input hidden type="submit" value="Connect" id="nameButton" style="padding-top: 10pxpx;" onclick="nameHandle()"></input>
+                <p hidden id="nameText">Enter the name you want to connect as. You can leave it blank.</p>
+            </div>
+          </div>
+         </div>
+      </div>
+    </div>
+  </div>
 </head>
 <body>
   <div
@@ -84,6 +144,8 @@
   @@include('templates/dialogs/import.html', {})
   @@include('templates/dialogs/performance-info.html', {})
   @@include('templates/dialogs/unsupported-browser.html', {})
+  @@include('templates/dialogs/connection-page.html', {})
+
 
   <!-- settings-panel partials -->
   @@include('templates/settings/preferences.html', {})
@@ -105,9 +167,26 @@
   <!--body-main-end-->
   <!-- the comment above indicates the end of the markup reused by the editor integrated in piskelapp.com -->
   <!-- do not delete, do not move :) -->
+  <!-- Modal -->
+<!--End Modal. Start Server if clicked-->
+
+
+
+<script type="text/javascript">
+  $(document).ready(function(){
+      $("#exampleModal").modal('show');
+      console.log('done');
+  });
   
+</script>
   <script>
+      
     
+document.onload = function () {
+  var theLogo = document.getElementById("theLogo");
+};
+
+
     function myFunction() {
   var x = document.getElementById("myDIV");
   if (x.style.display === "none") {
@@ -122,39 +201,55 @@
   }
 }
 
-
-
-
 $(document).ready(function () {
+  console.log('ready!')  
+  /*
     $("#iframe1").hide();
     $("#onOff").click(function (e) {
         e.preventDefault();
         $("#iframe1").fadeIn('slow');
     });
-
+   
     $("onOff").click(function () {
         $("#iframe1").fadeOut("slow");
-    });
+    });*/
+/*
+    $("#resync").click(function (e) {
+        e.preventDefault();
+
+        var newSync = io('http://192.168.1.104:3000/newSync', {
+  reconnectionDelay: 1000,
+  reconnection: true,
+  reconnectionAttemps: 10,
+  transports: ['websocket'],
+  agent: false,
+  upgrade: false,
+  rejectUnauthorized: false
 });
+        console.log("Requesting Sync");
+        newSync.emit("resyncRequest", "nothing");
+        console.log('done');
+        newSync.on('syncData', function(data) {
+        console.log('recieved')});
+        newSync.on('noData', function (data) {
+          console.log(data);
+        })
+       
+        
+    });
+*/
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+});
   </script>
-  <button onclick="myFunction()" id="onOff" style="position: absolute;right: 10px;bottom: 10px;">Show/Hide</button>
-  <div id="myDIV">
-    <iframe id="iframe1" src="http://192.168.12.109:3000/" height="0" width="600" title="Chat" style="position: absolute; right: 10px;bottom: 30px;"></iframe>
+
+ <!-- <button onclick="myFunction()" id="onOff" style="position: absolute;right: 10px;bottom: 10px;"></button> -->
+  
+  <!--<div id="myDIV">-->
+   <!-- <iframe id="iframe1" src="http://192.168.1.104:3000/" height="0" width="600" title="Chat" style="position: absolute; right: 10px;bottom: 30px;"></iframe> -->
   <!--You need to replace this IP with your own. You can change the port but if you do, you also need to on the otherserver.js file-->
-  </div>
+ <!-- </div> -->
+
+
+  <img src="img/icons/transform/tool-center.png" style="position: absolute;z-index: 0;" id="theLogo" alt="lolol its the failed image">
 </body>
 </html>

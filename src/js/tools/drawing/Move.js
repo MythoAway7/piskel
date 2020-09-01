@@ -40,6 +40,7 @@
     this.currentFrameClone = frame.clone();
   };
 
+
   ns.Move.prototype.moveToolAt = function(col, row, frame, overlay, event) {
     var colDiff = col - this.startCol;
     var rowDiff = row - this.startRow;

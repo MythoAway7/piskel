@@ -1,0 +1,27 @@
+How does this work?
+I'm glad you asked! Piskel is an amazing tool but lacked collorboration. I added collorboration using Socket.IO. This allows for real time communiacation with clients.
+You can have lots of clients working on the same project due to the nature of Socket.IO. The only limit is your PC and the limits placed on the piskel project!
+
+I had to enter my IP address. Why is that?
+The piskel server runs off of express. Express needs a local IP and a port to run this server. ALthough express will already know your IP the clients will not.
+I could have gone with localhost but some users will want to host this publicly which would not work. This is a local IP so you are not exposed to the scary internet :)
+There is no risk of being hacked from using this in a private enviroment. If you host there is the risk that comes with port forwarding. That is another matter.
+The port number customization is there in case a firewall prevents the use of port 3000.
+
+Piskel can lag when x happens. Why?
+IDK, ask the dev of piskel. Usually having lots of frames or huge resolutions can cause lag. Adding a server to constantly send the pixels across a network does not help matters.
+This is not depenedant on your internet speed as it is all local. If it happens when you are doing little work you may have a weak PC. It requires very little to run though.
+
+I typed in the wrong address/ my IP changed / Connection not found
+Simply run the setup file again. Your IP can change over time in certain enviroments. If it happens multiple times a day consider setting a static IP.
+
+I want to remove piskel.
+*sad face* Ok, just delete the entire folder. Simple as that. This is not a .exe where system variable are stored in program files :)
+If you want to remove the electron/nodejs you need to do that by yourself. Go to settings - apps . Find the program and uninstall it.
+These programs have many uses so it wouldn't hurt to keep them but it is up to you.
+
+Other issues/suggestions
+Let me know on the issue section on github or at any of the links in the links.txt file. DM me or whatever the platform offers.
+
+
+Thanks for using it :)

@@ -51,11 +51,13 @@
       var x = offsetX;
       var y = offsetY;
       var blankData = pskl.utils.CanvasUtils.createCanvas(width, height).toDataURL();
+      console.log(x,y,blankData)
 
       while (x + width <= image.width && y + height <= image.height) {
         // Create a new canvas element
         var canvas = pskl.utils.CanvasUtils.createCanvas(width, height);
         var context = canvas.getContext('2d');
+
 
         // Blit the correct part of the source image into the new canvas
         context.drawImage(

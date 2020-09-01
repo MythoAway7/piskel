@@ -59,6 +59,8 @@
       x : x,
       y : y
     };
+    //console.log(this.coordinates)
+   // socket.emit('mouseMove', this.coordinates);
     this.redraw();
   };
 

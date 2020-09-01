@@ -7,6 +7,11 @@
  *
  * Designed and built with all the love in the world @twitter by @mdo and @fat.
  */
+ button #onOff {
+  border: solid;
+  background-image: url("192.168.1.104:9901/css/socket/chat.png");
+  background-size: 100%;
+}
 .clearfix {
   *zoom: 1;
 }
