@@ -14,8 +14,15 @@
     this.shortcut = pskl.service.keyboard.Shortcuts.TOOL.PEN;
     this.previousCol = null;
     this.previousRow = null;
+    this.checkCol = null;
+    this.checkRow = null;
     this.pixels = [];
   };
+
+  
+  let checkClientRow = null;
+  let checkClientCol = null;
+
 
   pskl.utils.inherit(ns.SimplePen, ns.BaseTool);
 
@@ -36,53 +43,60 @@
   };
 
   ns.SimplePen.prototype.drawUsingPenSize = function(color, col, row, frame, overlay) {
-  //  console.log('drawing using pen size');
     var penSize = pskl.app.penSizeService.getPenSize();
     var points = pskl.PixelUtils.resizePixel(col, row, penSize);
     points.forEach(function (point) {
-      this.draw(color, point[0], point[1], frame, overlay);
+      this.draw(color, point[0], point[1], frame, overlay, penSize);
     }.bind(this));
+ //   console.log(points)
   };
+
+  var beenThrough = false; //This lets us do the socket.on only once.
+  var beenThroughSmall = false;
   var otherpixel = [] //We use this as a reference for what pixels the client has sent us.
-var clientColor;
-  ns.SimplePen.prototype.draw = function(color, col, row, frame, overlay) { 
-    
-socket.on('frameUpdate', function(data) { //A client has drawn something
-  console.log('Placing Client Pixels');
-  for (let i = 0; i < data.pixels.length; i++) { //For every pixel we draw it. Keep in mind the pixel doesn't exist on the frame until now.
-//  console.log("otherpixel: " + otherpixel[i].col, otherpixel[i].row, otherpixel[i].color);
+  var clientColor;
 
-      var width = frame.width;
-     var multiplier = data.pixels[i].row * width; //Y value times the width
-     var realNumber = multiplier + data.pixels[i].col// plus the x
-       console.log('Placing pixel at ' + realNumber);
-       clientColor = data.color
-       clientColor = pskl.utils.colorToInt(clientColor);
-      frame.pixels[realNumber] = clientColor;
-      console.log(`We are ${i} times through.`)
-  }
-//   isclient = true //We don't draw yet. When this is true it goes through an alt process and draws the client as well. Only after you draw after the client has drawn.
-})
-
+  ns.SimplePen.prototype.draw = function(color, col, row, frame, overlay, penSize) {
+     if (beenThrough !== true) {
+      socket.on('frameUpdate', function(data) { //Drawing client sketch
+     //   console.log('Placing Client Pixels');
+        frame.setPixel(data.pixels.col, data.pixels.row, data.color)
+        /*
+        var width = frame.width;
+        var multiplier = data.pixels[i].row * width; //Y value times the width
+        var realNumber = multiplier + data.pixels[i].col// plus the x
+        console.log('Client pixel at ' + realNumber);
+        clientColor = data.color
+        clientColor = pskl.utils.colorToInt(clientColor);
+        frame.pixels[realNumber] = clientColor;
+        */
+        checkClientRow = data.pixels.row;
+        checkClientCol = data.pixels.col;
+})} else {}
+   
 
     overlay.setPixel(col, row, color); //Apply the pixel to the overlay. This does not actually do anything. We view it but it won't last.
     if (color === Constants.TRANSPARENT_COLOR) {
       frame.setPixel(col, row, color);//This actually does stuff. Now it stays.
-    }
-    
-
-   this.pixels.push({ //We use this later. THis does not actually apply the pixels to the frame, just a reference for what it will be.
+   }
+   
+   if (this.checkCol == col && this.checkRow == row) {
+ //    console.log('Duplicate from host.');
+   } else {
+      this.pixels.push({ //We use this later. THis does not actually apply the pixels to the frame, just a reference for what it will be.
       col : col,
       row : row,
       color : color
     });
-    var data = {pixels: this.pixels, color: color} //A data packet with most of the required data. What we can't send we do there. Mainly anything that uses "this"
-     socket.emit('penTool', data); //When we release the tool send data to clients. 
-}
-  //[{col : col,
- // row : row,
-//  color : color
-//}];
+      beenThrough = true;
+     // console.log(this.pixels)
+      var data = {pixels: this.pixels, color: color} //A data packet with most of the required data. What we can't send we do there. Mainly anything that uses "this"
+       socket.emit('penTool', data); //When we release the tool send data to clients. 
+       this.checkRow = row; //These two statements we use to check if we are palcing duplicate pixels.
+      this.checkCol = col;
+  }
+
+} // end of drawing
 
 
   /**
@@ -96,16 +110,14 @@ socket.on('frameUpdate', function(data) { //A client has drawn something
       // We fill the gap by calculating missing dots (simple linear interpolation) and draw them.
       var interpolatedPixels = pskl.PixelUtils.getLinePixels(col, this.previousCol, row, this.previousRow);
       for (var i = 0, l = interpolatedPixels.length ; i < l ; i++) {
-        var coords = interpolatedPixels[i];
-        this.applyToolAt(coords.col, coords.row, frame, overlay, event);
-      }
+          var coords = interpolatedPixels[i];
+          this.applyToolAt(coords.col, coords.row, frame, overlay, event);
+          }
     } else { this.applyToolAt(col, row, frame, overlay, event); }
 
     this.previousCol = col;
     this.previousRow = row;
   };
-
-
 
 
 ns.SimplePen.prototype.releaseToolAt = function(col, row, frame, overlay, event) {
@@ -131,14 +143,11 @@ ns.SimplePen.prototype.releaseToolAt = function(col, row, frame, overlay, event)
   ns.SimplePen.prototype.setPixelsToFrame_ = function (frame, pixels, color) { //The normal method uses this to actaully draw the pixels. Frame
     pixels.forEach(function (pixel) {
       frame.setPixel(pixel.col, pixel.row, pixel.color);
-      
-      console.log('ending!')
     });
-    
   };
 
   ns.SimplePen.prototype.resetUsedPixels_ = function() { //helps with undoing stuff
     this.pixels = [];
-    console.log('done')
   };
+  
 })();

@@ -93,7 +93,7 @@
    */
   ns.Frame.prototype.setPixels = function (pixels) {
     //
-    console.log(pixels);
+  //  console.log(pixels); This is the array of pixlels, translated.
     this.pixels = this.clonePixels_(pixels);
     this.version++;
   };

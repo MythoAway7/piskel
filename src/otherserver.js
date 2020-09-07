@@ -116,11 +116,43 @@ io.on('connection', socket => {
     }
   });
 
-  socket.on('penTool', (data) => {
+  socket.on('penTool', (data) => { // pen data
     aNume = aNume + 1;
-    console.log(aNume)
-    socket.broadcast.emit('penTool1', data);
-    socket.broadcast.emit('frameUpdate',data)
+    console.log(aNume);
+    data.pixels = data.pixels[`${data.pixels.length - 1}`];
+    console.log(data);
+   // socket.broadcast.emit('penTool1', data);
+    socket.broadcast.emit('frameUpdate', data)
+  });
+
+
+  socket.on('penToolSmall', (data) => { // pen data
+    aNume = aNume + 1;
+    console.log(aNume);
+    data.pixels = data.pixels[`${data.pixels.length - 1}`];
+    console.log(data);
+   // socket.broadcast.emit('penTool1', data);
+    socket.broadcast.emit('penToolSmallClient', data)
+  });
+
+
+  socket.on('penToolMeduim', (data) => { // pen data
+    aNume = aNume + 1;
+    console.log(aNume);
+    data.pixels = data.pixels[`${data.pixels.length - 1}`];
+    console.log(data);
+   // socket.broadcast.emit('penTool1', data);
+    socket.broadcast.emit('penToolMeduimClient', data)
+  });
+
+
+  socket.on('penToolBig', (data) => { // pen data
+    aNume = aNume + 1;
+    console.log(aNume);
+    data.pixels = data.pixels[`${data.pixels.length - 1}`];
+    console.log(data);
+   // socket.broadcast.emit('penTool1', data);
+    socket.broadcast.emit('penToolBigClient', data)
   });
 
 
@@ -130,7 +162,6 @@ io.on('connection', socket => {
   });
 
 }) //End of server1
-
 
 
 
