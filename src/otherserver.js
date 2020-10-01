@@ -92,18 +92,20 @@ io.on('connection', (socket) => { //Starts the basic server and chat.
 //var server1 = io.of('/server1');
 var serverCount1 = 0 //Count of Clients
 var serverList1 = ["serverListener","Serverhandler","ReadtheReadMeFile"]; //Array of users
-var aNume = 0;
+var aNume = 0; //Logs total actions sent to server. 
+var penSmall = 0; //Pensmall actions
+var penSmallData = []; //pensmall data. We store up to 4 pixels and then wipe it.
 // Create more if needed.
 
 io.on('connection', socket => {
     console.log("A client is connecting...");
     socket.emit("ping"); //ping pong
   socket.on("nameClaim", serverName => { //handles name claims per session. They are reset each session.
-    console.log("trying to claim name");
+    console.log("A user is trying to claim a name.");
     if (serverName == "Mytho") {console.log("Someone very special tried to join :)")} //:)
     for (i = 0; i < serverList1.length; i++) {
       if (serverList1[i] == serverName) { //The name exists already
-        console.log('A user requested a name that has already been taken. Asking again...');
+        console.log('A user requested a name that has already been taken. Retrying...');
         socket.emit("retryName", ""); //Ask the user to retry
         break; //End the loop
       } else if (serverList1[i] !== serverName && i == serverList1.length - 1) { //new Name!
@@ -119,7 +121,7 @@ io.on('connection', socket => {
   socket.on('penTool', (data) => { // pen data
     aNume = aNume + 1;
     console.log(aNume);
-    data.pixels = data.pixels[`${data.pixels.length - 1}`];
+   // data.pixels = data.pixels[`${data.pixels.length - 1}`];
     console.log(data);
    // socket.broadcast.emit('penTool1', data);
     socket.broadcast.emit('frameUpdate', data)
@@ -128,11 +130,24 @@ io.on('connection', socket => {
 
   socket.on('penToolSmall', (data) => { // pen data
     aNume = aNume + 1;
-    console.log(aNume);
-    data.pixels = data.pixels[`${data.pixels.length - 1}`];
+    penSmall = penSmall + 1; //Caps at 4
+    console.log(penSmall);
+    penSmallData.push({
+      col : data.pixels.col,
+      row : data.pixels.row,
+      color : data.color
+    });
+    // data.pixels = data.pixels[`${data.pixels.length - 1}`];
+    if (penSmall == 4) { //Send it sets of 4 pixels.
+      penSmall = 0;
+      data.pixels = penSmallData
+      penSmallData = [];
+      socket.broadcast.emit('penSmallData', data)
+      
+    } else {
+     console.log('nothing')
+    }
     console.log(data);
-   // socket.broadcast.emit('penTool1', data);
-    socket.broadcast.emit('penToolSmallClient', data)
   });
 
 
@@ -154,6 +169,27 @@ io.on('connection', socket => {
    // socket.broadcast.emit('penTool1', data);
     socket.broadcast.emit('penToolBigClient', data)
   });
+
+
+
+  socket.on("addLayer", (layer) => {
+    console.log("Building Piskel Layer");
+    socket.broadcast.emit("addLayerClient", layer);
+  })
+
+
+
+  socket.on("layerCreation", (data) => {
+    console.log("A client has added a layer. Updating users.");
+    socket.broadcast.emit("createLayer", data);
+  })
+
+
+
+  socket.on("layerName", (data) => {
+    console.log(`Layer ${data.index} is being renamed to ${data.name}`);
+    socket.broadcast.emit("renameLayer", data);
+  })
 
 
   socket.on('disconnecting', () => { //handles disconnects. The name will not be avaible.

@@ -51,6 +51,7 @@ function start(serverLocation, serverNumber) {
   } else if (socket.connected == true) {
     console.log("Connection Succeeded");
     connectionvalue = true
+    pskl.app.corePiskelController.socketIO() //Run all the socket event listeners. VIP
     theCallback()
   } else {
     console.log("Unknown error. Returning as failed.")

@@ -60,7 +60,14 @@
 
   ns.ResizeController.prototype.onResizeFormSubmit_ = function (evt) {
     evt.preventDefault();
-
+    try {
+      console.log(this);
+      console.log(pskl)
+      
+    } catch (e) {
+      console.log(e)
+      
+    }
     var currentPiskel = this.piskelController.getPiskel();
     var piskel = pskl.utils.ResizeUtils.resizePiskel(currentPiskel, {
       width :  parseInt(this.widthInput.value, 10),

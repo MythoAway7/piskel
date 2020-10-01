@@ -30,6 +30,28 @@
 
   ns.PiskelController.prototype.init = function () {
   };
+  ns.PiskelController.prototype.socketIO = function() { //A function that is ran when socket.io connects. Most non drawing actions are done here.
+
+    socket.on("createLayer", function (data) { //A client creates a layer.
+      console.log('Layer from client.');
+      var layer = new pskl.model.Layer(data.name); //make a new layer
+      for (var i = 0 ; i < pskl.app.corePiskelController.getFrameCount() ; i++) {
+        layer.addFrame(pskl.app.corePiskelController.createEmptyFrame_()); //Gets the right amount of frames.
+      }
+      pskl.app.corePiskelController.piskel.addLayerAt(layer, data.currentLayerIndex + 1); //Adds the layer at the index
+      pskl.app.corePiskelController.setCurrentLayerIndex(data.currentLayerIndex); //Reselects the current layer. It was switching to the new layer.
+      pskl.app.layersListController.renderLayerList_() //
+    })
+
+    socket.on("renameLayer", function (data) { //Renames the layer
+      console.log(`A client has renamed a layer. Updating layer ${data.index} to ${data.name}`);
+      var renamedLayer =  pskl.app.corePiskelController.getLayerByIndex(data.index);
+      renamedLayer.setName(data.name);
+      pskl.app.layersListController.renderLayerList_()
+    })
+
+
+  }
 
   ns.PiskelController.prototype.getHeight = function () {
     return this.piskel.getHeight();
@@ -185,6 +207,7 @@
   };
 
   ns.PiskelController.prototype.setCurrentLayerIndex = function (index) {
+    console.log('Setting layer index to' + index);
     if (this.hasLayerAt(index)) {
       this.currentLayerIndex = index;
     } else {
@@ -200,9 +223,12 @@
   };
 
   ns.PiskelController.prototype.renameLayerAt = function (index, name) {
+    console.log('Renaming')
     var layer = this.getLayerByIndex(index);
     if (layer) {
       layer.setName(name);
+      var data = {index: index, name: name}
+      socket.emit("layerName", data )
     }
   };
 
@@ -243,17 +269,21 @@
   };
 
   ns.PiskelController.prototype.createLayer = function (name) {
+    console.log('Creating Layer');
     if (!name) {
-      name = this.generateLayerName_();
+      name = this.generateLayerName_(); //Step 1. Check for a name.
     }
     if (!this.hasLayerForName_(name)) {
       var layer = new pskl.model.Layer(name);
       for (var i = 0 ; i < this.getFrameCount() ; i++) {
-        layer.addFrame(this.createEmptyFrame_());
+        layer.addFrame(this.createEmptyFrame_()); //Frame counter. Adds the current amount.
       }
+      console.log(i);
       var currentLayerIndex = this.getCurrentLayerIndex();
       this.piskel.addLayerAt(layer, currentLayerIndex + 1);
       this.setCurrentLayerIndex(currentLayerIndex + 1);
+      var data = {name: name, frames2Make: i, currentLayerIndex: currentLayerIndex }
+      socket.emit("layerCreation", data)
     } else {
       throw 'Layer name should be unique';
     }
@@ -306,3 +336,4 @@
     return pskl.app.currentColorsService.getCurrentColors().length === 0;
   };
 })();
+

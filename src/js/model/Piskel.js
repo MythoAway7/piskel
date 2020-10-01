@@ -10,12 +10,15 @@
    */
   ns.Piskel = function (width, height, fps, descriptor) {
     if (width && height && descriptor) {
+      this.kindaDoneLoading = false;
       this.layers = [];
       this.width = width;
       this.height = height;
       this.descriptor = descriptor;
       this.savePath = null;
       this.fps = fps;
+      this.theCurrentLayer = null;
+      this.theCurrentFrame = null;
     } else {
       throw 'Missing arguments in Piskel constructor : ' + Array.prototype.join.call(arguments, ',');
     }
