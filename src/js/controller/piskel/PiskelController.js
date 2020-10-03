@@ -71,7 +71,7 @@
       pskl.app.layersListController.renderLayerList_()
     })
 
-    socket.on("clientMergeLayer", function (data) { //Merges a layer 
+    socket.on("clientMergeLayer", function (data) { //Merges a layer (always merges below)
       console.log(`Merging layer ${data.index} down.`);
       var layer = pskl.app.corePiskelController.getLayerByIndex(data.index);
       var downLayer = pskl.app.corePiskelController.getLayerByIndex(data.index - 1);
