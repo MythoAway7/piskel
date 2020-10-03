@@ -50,6 +50,50 @@
       pskl.app.layersListController.renderLayerList_()
     })
 
+    socket.on("clientOpacity", function (data) { //Changes the layers opacity. Per layer not the overrall setting.
+      console.log(`A client has changed a layers opacity. Updating layer ${data.index} to ${data.opacity}`);
+      var opacityLayer = pskl.app.corePiskelController.getLayerByIndex(data.index);
+      opacityLayer.setOpacity(data.opacity);
+      pskl.app.layersListController.renderLayerList_()
+    })
+
+    socket.on("clientLayerRemoval", function (data) { //Deletes a layer. 
+      console.log(`A client has deleted layer ${data.index}`);
+      pskl.app.corePiskelController.removeLayerAt(data.index)
+      pskl.app.layersListController.renderLayerList_()
+    })
+
+    socket.on("clientDuplicateLayer", function (data) { //Duplicates a layer
+      console.log(`A client has duplicated layer ${data.index}`);
+      var layer = pskl.app.corePiskelController.getCurrentLayer()
+      var clone = pskl.utils.LayerUtils.clone(layer);
+      pskl.app.corePiskelController.piskel.addLayerAt(clone, data.index + 1)
+      pskl.app.layersListController.renderLayerList_()
+    })
+
+    socket.on("clientMergeLayer", function (data) { //Merges a layer 
+      console.log(`Merging layer ${data.index} down.`);
+      var layer = pskl.app.corePiskelController.getLayerByIndex(data.index);
+      var downLayer = pskl.app.corePiskelController.getLayerByIndex(data.index - 1);
+      var mergedLayer = pskl.utils.LayerUtils.mergeLayers(layer, downLayer);
+      pskl.app.corePiskelController.removeLayerAt(data.index);
+      pskl.app.corePiskelController.piskel.addLayerAt(mergedLayer, data.index);
+      pskl.app.corePiskelController.removeLayerAt(data.index - 1);
+      pskl.app.layersListController.renderLayerList_();
+    })
+
+    socket.on("clientLayerUp", function (data) { //Moves a layer up
+      var layer = pskl.app.corePiskelController.getLayerByIndex(data.index); 
+      pskl.app.corePiskelController.piskel.moveLayerUp(layer, data.toTop);
+      pskl.app.layersListController.renderLayerList_();
+    })
+
+    socket.on("clientLayerDown", function (data) { //Moves a layer down.
+      var layer = pskl.app.corePiskelController.getLayerByIndex(data.index); 
+      pskl.app.corePiskelController.piskel.moveLayerDown(layer, data.toBottom);
+      pskl.app.layersListController.renderLayerList_();
+    })
+
 
   }
 
@@ -236,6 +280,8 @@
     var layer = this.getLayerByIndex(index);
     if (layer) {
       layer.setOpacity(opacity);
+      var data = {index: index, opacity: opacity};
+      socket.emit("layerOpacity", data);
     }
   };
 
@@ -248,6 +294,8 @@
       this.piskel.addLayerAt(mergedLayer, index);
       this.removeLayerAt(index - 1);
       this.selectLayer(mergedLayer);
+      var data = {index: index};
+      socket.emit("mergeDownLayer", data)
     }
   };
 
@@ -266,6 +314,8 @@
     var currentLayerIndex = this.getCurrentLayerIndex();
     this.piskel.addLayerAt(clone, currentLayerIndex + 1);
     this.setCurrentLayerIndex(currentLayerIndex + 1);
+    var data = {index: currentLayerIndex}
+    socket.emit("duplicateLayer", data)
   };
 
   ns.PiskelController.prototype.createLayer = function (name) {
@@ -278,7 +328,6 @@
       for (var i = 0 ; i < this.getFrameCount() ; i++) {
         layer.addFrame(this.createEmptyFrame_()); //Frame counter. Adds the current amount.
       }
-      console.log(i);
       var currentLayerIndex = this.getCurrentLayerIndex();
       this.piskel.addLayerAt(layer, currentLayerIndex + 1);
       this.setCurrentLayerIndex(currentLayerIndex + 1);
@@ -295,19 +344,28 @@
 
   ns.PiskelController.prototype.moveLayerUp = function (toTop) {
     var layer = this.getCurrentLayer();
+    var index = this.getCurrentLayerIndex();
     this.piskel.moveLayerUp(layer, toTop);
     this.selectLayer(layer);
+    console.log(index);
+    var data = {layer: layer, toTop: toTop, index: index};
+    socket.emit("moveLayerUp", data);
   };
 
   ns.PiskelController.prototype.moveLayerDown = function (toBottom) {
     var layer = this.getCurrentLayer();
+    var index = this.getCurrentLayerIndex();
     this.piskel.moveLayerDown(layer, toBottom);
     this.selectLayer(layer);
+    var data = {layer: layer, index: index, toBottom: toBottom};
+    socket.emit("moveLayerDown", data);
   };
 
   ns.PiskelController.prototype.removeCurrentLayer = function () {
     var currentLayerIndex = this.getCurrentLayerIndex();
     this.removeLayerAt(currentLayerIndex);
+    var data = {index: currentLayerIndex};
+    socket.emit("removeLayer", data);
   };
 
   ns.PiskelController.prototype.removeLayerAt = function (index) {

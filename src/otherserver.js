@@ -192,6 +192,43 @@ io.on('connection', socket => {
   })
 
 
+
+  socket.on("layerOpacity", (data) => {
+    console.log(`Layer ${data.index} is now at ${data.opacity} opacity.`);
+    socket.broadcast.emit("clientOpacity", data);
+  })
+
+
+  socket.on("removeLayer", (data) => {
+    console.log(`Layer ${data.index} is being deleted.`);
+    socket.broadcast.emit("clientLayerRemoval", data);
+  })
+
+
+  socket.on("duplicateLayer", (data) => {
+    console.log(`Layer ${data.index} is being cloned.`);
+    socket.broadcast.emit("clientDuplicateLayer", data);
+  })
+
+
+  socket.on("mergeDownLayer", (data) => {
+    console.log(`Layer ${data.index} is being merged with a layer below it.`);
+    socket.broadcast.emit("clientMergeLayer", data);
+  })
+
+
+  socket.on("moveLayerUp", (data) => {
+    console.log(`${data.layer.name} is being moved up.`);
+    socket.broadcast.emit("clientLayerUp", data);
+  })
+
+
+  socket.on("moveLayerDown", (data) => {
+    console.log(`${data.layer.name} is being moved down.`);
+    socket.broadcast.emit("clientLayerDown", data);
+  })
+
+
   socket.on('disconnecting', () => { //handles disconnects. The name will not be avaible.
   console.log("A user has disconnected.");
   serverCount1 = serverCount1 - 1;
