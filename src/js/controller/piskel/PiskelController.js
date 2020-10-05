@@ -31,7 +31,6 @@
   ns.PiskelController.prototype.init = function () {
   };
   ns.PiskelController.prototype.socketIO = function() { //A function that is ran when socket.io connects. Most non drawing actions are done here.
-
     socket.on("createLayer", function (data) { //A client creates a layer.
       console.log('Layer from client.');
       var layer = new pskl.model.Layer(data.name); //make a new layer
@@ -138,9 +137,13 @@
       }
       pskl.app.framesListController.renderDom()
     })
+    //End of Frame controls. Drawing begins
+
 
 
   }
+
+  
 
   ns.PiskelController.prototype.getHeight = function () {
     return this.piskel.getHeight();
@@ -281,6 +284,7 @@
   ns.PiskelController.prototype.setCurrentFrameIndex = function (index) {
     if (this.hasFrameAt(index)) {
       this.currentFrameIndex = index;
+      pskl.tools.drawing.theCurrentFrame = index;
     } else {
       window.console.error('Could not set current frame index to ' + index);
     }
@@ -304,6 +308,7 @@
     console.log('Setting layer index to' + index);
     if (this.hasLayerAt(index)) {
       this.currentLayerIndex = index;
+      pskl.tools.drawing.theCurrentLayer = index; //Notify the simple pen which layer we are on.
     } else {
       window.console.error('Could not set current layer index to ' + index);
     }

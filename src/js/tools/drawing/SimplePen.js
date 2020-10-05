@@ -27,15 +27,8 @@
   let checkClientCol = null;
 
   
-  var theCurrentFrame;
-  var theCurrentLayer;
   setTimeout(() => { //Marks the frame and layer as well as a progress indicator for loading.
-    theCurrentFrame = pskl.app.corePiskelController.getCurrentFrameIndex(); //The index on the layer. They are in a set order unless moved. We use it to know which frame to draw to.
-    pskl.app.corePiskelController.piskel.theCurrentFrame = theCurrentFrame
-    theCurrentLayer = pskl.app.corePiskelController.getCurrentLayerIndex(); //Same thing but with layers instead of frames. 
-    pskl.app.corePiskelController.piskel.theCurrentLayer = theCurrentLayer;
     pskl.app.corePiskelController.piskel.kindaDoneLoading = true;
-    console.log('Done. Layer and Frame Indexed.' + `${theCurrentLayer} is the layer. ${theCurrentFrame} is the frame.`)
   }, 10000);
   
 
@@ -83,7 +76,7 @@
       socket.on('frameUpdate', function(data) { //Drawing client sketch
         console.log('Placing Client Pixels');
        // frame.setPixel(data.pixels.col, data.pixels.row, data.color)
-       pskl.app.corePiskelController.piskel.layers[`${pskl.app.corePiskelController.piskel.theCurrentLayer}`].frames[`${pskl.app.corePiskelController.piskel.theCurrentFrame}`].setPixel(data.pixels.col, data.pixels.row, data.color)
+       pskl.app.corePiskelController.piskel.layers[`${data.location.layer}`].frames[`${data.location.frame}`].setPixel(data.pixels.col, data.pixels.row, data.color)
         /*
         var width = frame.width;
         var multiplier = data.pixels[i].row * width; //Y value times the width
@@ -126,7 +119,7 @@ socket.on('penSmallData', function(data) { //Drawing client sketch
    //   var data = {pixels: this.pixels.slice(-1)[0], color: color} //A data packet with most of the required data. What we can't send we do there. Mainly anything that uses "this"
       switch (penSize) {
         case 1:
-          var data = {pixels: this.pixels.slice(-1)[0], color: color};
+          var data = {pixels: this.pixels.slice(-1)[0], color: color, location: {frame: pskl.app.corePiskelController.getCurrentFrameIndex(), layer: pskl.app.corePiskelController.getCurrentLayerIndex()}};
           socket.emit('penTool', data); //When we release the tool send data to clients. 
           break;
         case 2:
