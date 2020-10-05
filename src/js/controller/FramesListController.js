@@ -65,6 +65,14 @@
     }
   };
 
+  ns.FramesListController.prototype.renderDom = function () { // A custom funtion to update the frame list after a client adds a frame.
+        this.tiles = [];
+        this.addFrameTile = null;
+        this.createPreviews_();
+        this.regenerateDomFlag = false;
+        this.updatePreviews_();
+  };
+
   ns.FramesListController.prototype.updateScrollerOverflows = function () {
     var scroller = this.previewListScroller;
     var scrollerHeight = scroller.offsetHeight;

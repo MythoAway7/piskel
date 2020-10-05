@@ -171,7 +171,7 @@ io.on('connection', socket => {
   });
 
 
-
+//Start of layer events
   socket.on("addLayer", (layer) => {
     console.log("Building Piskel Layer");
     socket.broadcast.emit("addLayerClient", layer);
@@ -226,6 +226,28 @@ io.on('connection', socket => {
   socket.on("moveLayerDown", (data) => {
     console.log(`${data.layer.name} is being moved down.`);
     socket.broadcast.emit("clientLayerDown", data);
+  })
+
+//End of layer events. Beginning Frame events
+
+  socket.on("addFrameAt", (index) => {
+    console.log(`A frame is being added at index ${index}`);
+    socket.broadcast.emit("clientAddFrame", index);
+  })
+
+  socket.on("removeFrame", (index) => {
+    console.log(`Frame ${index} is being removed.`);
+    socket.broadcast.emit("clientRemoveFrame", index);
+  })
+
+  socket.on("duplicateFrame", (index) => {
+    console.log(`Frame ${index} is being duplicated.`);
+    socket.broadcast.emit("clientDuplicatingFrame", index);
+  })
+
+  socket.on("moveFrame", (data) => {
+    console.log(`Frame ${data.fromIndex} is being moved to ${data.toIndex}`);
+    socket.broadcast.emit("clientMovingFrame", data);
   })
 
 

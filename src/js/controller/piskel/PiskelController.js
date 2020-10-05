@@ -94,6 +94,51 @@
       pskl.app.layersListController.renderLayerList_();
     })
 
+//End of socket layers. Beginning of Frames
+
+    socket.on("clientAddFrame", function (index) { //Moves a layer down.
+      console.log('Adding client frames.')
+      pskl.app.corePiskelController.getLayers().forEach(function (l) {
+        l.addFrameAt(pskl.app.corePiskelController.createEmptyFrame_(), index);
+      }.bind(pskl.app.corePiskelController));
+      pskl.app.framesListController.renderDom()
+    })
+
+    socket.on("clientRemoveFrame", function (index) { //Moves a layer down.
+      console.log('Removing client frames.')
+      pskl.app.corePiskelController.getLayers().forEach(function (l) {
+        l.removeFrameAt(index);
+      });
+      // Current frame index is impacted if the removed frame was before the current frame
+      if (pskl.app.corePiskelController.currentFrameIndex >= index && pskl.app.corePiskelController.currentFrameIndex > 0) {
+        pskl.app.corePiskelController.setCurrentFrameIndex(pskl.app.corePiskelController.currentFrameIndex - 1);}
+      pskl.app.framesListController.renderDom()
+    })
+
+    socket.on("clientDuplicatingFrame", function (index) { //Moves a layer down.
+      console.log('Duplicating client frames.');
+      pskl.app.corePiskelController.getLayers().forEach(function (l) {
+        l.duplicateFrameAt(index);
+      });
+      pskl.app.framesListController.renderDom()
+    })
+
+    socket.on("clientMovingFrame", function (data) { //Moves a layer down.
+      console.log('Moving Client Frames.');
+      var currentIndex = pskl.app.corePiskelController.getCurrentFrameIndex();
+      pskl.app.corePiskelController.getLayers().forEach(function (l) {
+        l.moveFrame(data.fromIndex, data.toIndex);
+      });
+      if (currentIndex == data.fromIndex) { //These statements move the current selected frame if needed since they are not linked as in normal piskel.
+        console.log("The layer we were editing has moved! Fixing.");
+        pskl.app.corePiskelController.setCurrentFrameIndex(data.toIndex);
+      } else if (currentIndex == data.toIndex) {
+        console.log("A frame is being moved to the current frame. Fixing.");
+        pskl.app.corePiskelController.setCurrentFrameIndex(data.fromIndex);
+      }
+      pskl.app.framesListController.renderDom()
+    })
+
 
   }
 
@@ -183,9 +228,10 @@
     this.addFrameAt(this.currentFrameIndex + 1);
   };
 
-  ns.PiskelController.prototype.addFrameAt = function (index) {
+  ns.PiskelController.prototype.addFrameAt = function (index) { //I use this function to add frames.
     this.getLayers().forEach(function (l) {
       l.addFrameAt(this.createEmptyFrame_(), index);
+      socket.emit("addFrameAt", index); //For every layer we have to replicate this. THe emit is also replicated.
     }.bind(this));
 
     this.setCurrentFrameIndex(index);
@@ -200,6 +246,7 @@
   ns.PiskelController.prototype.removeFrameAt = function (index) {
     this.getLayers().forEach(function (l) {
       l.removeFrameAt(index);
+      socket.emit("removeFrame", index);
     });
     // Current frame index is impacted if the removed frame was before the current frame
     if (this.currentFrameIndex >= index && this.currentFrameIndex > 0) {
@@ -214,13 +261,16 @@
   ns.PiskelController.prototype.duplicateFrameAt = function (index) {
     this.getLayers().forEach(function (l) {
       l.duplicateFrameAt(index);
+      socket.emit("duplicateFrame", index);
     });
     this.setCurrentFrameIndex(index + 1);
   };
 
   ns.PiskelController.prototype.moveFrame = function (fromIndex, toIndex) {
+    var data = {fromIndex: fromIndex, toIndex: toIndex};
     this.getLayers().forEach(function (l) {
       l.moveFrame(fromIndex, toIndex);
+      socket.emit("moveFrame", data)
     });
   };
 
