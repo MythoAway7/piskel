@@ -1,7 +1,7 @@
 //Run this server BEFORE you run grunt play
 //You run this by typing node otherserver.js in the proper directory
 
-
+const fs = require('fs'); //Server logging and state saving. (WIP)
 var app = require('express')(); //Website
 var http = require('http').createServer(app); //Webstuff
 var io = require('socket.io')(http); //websockets
@@ -92,9 +92,13 @@ io.on('connection', (socket) => { //Starts the basic server and chat.
 //var server1 = io.of('/server1');
 var serverCount1 = 0 //Count of Clients
 var serverList1 = ["serverListener","Serverhandler","ReadtheReadMeFile"]; //Array of users
+var totalusers = 0;
 var aNume = 0; //Logs total actions sent to server. 
 var penSmall = 0; //Pensmall actions
 var penSmallData = []; //pensmall data. We store up to 4 pixels and then wipe it.
+var layerActions;
+var frameActions;
+var logs = {};
 // Create more if needed.
 
 io.on('connection', socket => {
@@ -113,6 +117,7 @@ io.on('connection', socket => {
            socket.emit("successName", "");// it worked
            console.log(`${serverName} has joined server 1.`); //Tell the server
            serverCount1 = serverCount1 + 1;
+           totalusers = totalusers + 1;
            break;
       }
     }
@@ -174,6 +179,7 @@ io.on('connection', socket => {
 //Start of layer events
   socket.on("addLayer", (layer) => {
     console.log("Building Piskel Layer");
+    layerActions = layerActions + 1;
     socket.broadcast.emit("addLayerClient", layer);
   })
 
@@ -181,6 +187,7 @@ io.on('connection', socket => {
 
   socket.on("layerCreation", (data) => {
     console.log("A client has added a layer. Updating users.");
+    layerActions = layerActions + 1;
     socket.broadcast.emit("createLayer", data);
   })
 
@@ -188,6 +195,7 @@ io.on('connection', socket => {
 
   socket.on("layerName", (data) => {
     console.log(`Layer ${data.index} is being renamed to ${data.name}`);
+    layerActions = layerActions + 1;
     socket.broadcast.emit("renameLayer", data);
   })
 
@@ -195,36 +203,42 @@ io.on('connection', socket => {
 
   socket.on("layerOpacity", (data) => {
     console.log(`Layer ${data.index} is now at ${data.opacity} opacity.`);
+    layerActions = layerActions + 1;
     socket.broadcast.emit("clientOpacity", data);
   })
 
 
   socket.on("removeLayer", (data) => {
     console.log(`Layer ${data.index} is being deleted.`);
+    layerActions = layerActions + 1;
     socket.broadcast.emit("clientLayerRemoval", data);
   })
 
 
   socket.on("duplicateLayer", (data) => {
     console.log(`Layer ${data.index} is being cloned.`);
+    layerActions = layerActions + 1;
     socket.broadcast.emit("clientDuplicateLayer", data);
   })
 
 
   socket.on("mergeDownLayer", (data) => {
     console.log(`Layer ${data.index} is being merged with a layer below it.`);
+    layerActions = layerActions + 1;
     socket.broadcast.emit("clientMergeLayer", data);
   })
 
 
   socket.on("moveLayerUp", (data) => {
     console.log(`${data.layer.name} is being moved up.`);
+    layerActions = layerActions + 1;
     socket.broadcast.emit("clientLayerUp", data);
   })
 
 
   socket.on("moveLayerDown", (data) => {
     console.log(`${data.layer.name} is being moved down.`);
+    layerActions = layerActions + 1;
     socket.broadcast.emit("clientLayerDown", data);
   })
 
@@ -232,21 +246,25 @@ io.on('connection', socket => {
 
   socket.on("addFrameAt", (index) => {
     console.log(`A frame is being added at index ${index}`);
+    frameActions = frameActions + 1;
     socket.broadcast.emit("clientAddFrame", index);
   })
 
   socket.on("removeFrame", (index) => {
     console.log(`Frame ${index} is being removed.`);
+    frameActions = frameActions + 1;
     socket.broadcast.emit("clientRemoveFrame", index);
   })
 
   socket.on("duplicateFrame", (index) => {
     console.log(`Frame ${index} is being duplicated.`);
+    frameActions = frameActions + 1;
     socket.broadcast.emit("clientDuplicatingFrame", index);
   })
 
   socket.on("moveFrame", (data) => {
     console.log(`Frame ${data.fromIndex} is being moved to ${data.toIndex}`);
+    frameActions = frameActions + 1;
     socket.broadcast.emit("clientMovingFrame", data);
   })
 
@@ -259,8 +277,24 @@ io.on('connection', socket => {
 }) //End of server1
 
 
+//Every 5 minutes we display server stats. Every 15 minutes we log data
 
-
+setInterval(function(){
+  var today = new Date();
+  var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  logs = {
+    message: "These are updated every 15 minutes. These stats help me to identify usage for the average user.",
+    frameActions: frameActions,
+    layerActions: layerActions,
+    pixelActions: aNume,
+    activeUsers: serverList1,
+    activeUserCount: serverCount1,
+    totalUsers: totalusers,
+    time: time
+  }
+  let data = JSON.stringify(logs)
+  fs.writeFileSync('student-2.json', data);
+}, 20000);
 
 
 
