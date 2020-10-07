@@ -174,6 +174,13 @@ io.on('connection', socket => {
    // socket.broadcast.emit('penTool1', data);
     socket.broadcast.emit('penToolBigClient', data)
   });
+  //End of PenTool
+
+  // Paint Bucket
+  socket.on("paintBucket", (data) => {
+    console.log(`Paint Bucket used. ${data}`);
+    socket.broadcast.emit("paintBucketClient", data);
+  })
 
 
 //Start of layer events
