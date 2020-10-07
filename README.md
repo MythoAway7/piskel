@@ -1,10 +1,10 @@
-Piskel
+Piskel Collorboration
 ======
 
 [![Travis Status](https://api.travis-ci.org/piskelapp/piskel.png?branch=master)](https://travis-ci.org/piskelapp/piskel) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/)
 
-Piskel is an easy-to-use sprite editor. It can be used to create game sprites, animations, pixel-art...
-It is the editor used in **[piskelapp.com](http://piskelapp.com)**.
+Piskel is an easy-to-use sprite editor. It can be used to create game sprites, animations, pixel-art... **[WITH COLLORBORATION SUPPORT]
+A normal build of piskel can be found here **[piskelapp.com](http://piskelapp.com)**.
 
 <img
   src="https://screenletstore.appspot.com/img/95aaa0f0-37a4-11e7-a652-7b8128ce3e3b.png"
@@ -25,6 +25,7 @@ We also use the following **libraries** :
 * [canvas-toBlob](https://github.com/eligrey/canvas-toBlob.js/) : shim for canvas toBlob
 * [jquery](http://jquery.com/) : used sporadically in the application
 * [bootstrap-tooltip](http://getbootstrap.com/javascript/#tooltips) : nice tooltips
+* [socketIO](https://socket.io) : sending data to all clients in real time
 
 As well as some **icons** from the [Noun Project](http://thenounproject.com/) :
 * Folder by Simple Icons from The Noun Project
@@ -40,11 +41,7 @@ Piskel supports the following browsers:
 
 ### Mobile/Tablets
 
-There is no support for mobile.
-
-### Offline builds
-
-Offline builds are available. More details in the [dedicated wiki page](https://github.com/piskelapp/piskel/wiki/Desktop-applications).
+Mobile support is very limited. Some tools and/or features may not work as intended. Use at your own risk.
 
 ## Contributing ?
 
