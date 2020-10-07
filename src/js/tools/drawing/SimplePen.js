@@ -66,37 +66,12 @@
  //   console.log(points)
   };
 
-  var beenThrough = false; //This lets us do the socket.on only once.
-  var beenThroughSmall = false;
+
   var otherpixel = [] //We use this as a reference for what pixels the client has sent us.
   var clientColor;
 
   ns.SimplePen.prototype.draw = function(color, col, row, frame, overlay, penSize) {
-     if (beenThrough !== true) {
-      socket.on('frameUpdate', function(data) { //Drawing client sketch
-        console.log('Placing Client Pixels');
-       // frame.setPixel(data.pixels.col, data.pixels.row, data.color)
-       pskl.app.corePiskelController.piskel.layers[`${data.location.layer}`].frames[`${data.location.frame}`].setPixel(data.pixels.col, data.pixels.row, data.color)
-        /*
-        var width = frame.width;
-        var multiplier = data.pixels[i].row * width; //Y value times the width
-        var realNumber = multiplier + data.pixels[i].col// plus the x
-        console.log('Client pixel at ' + realNumber);
-        clientColor = data.color
-        clientColor = pskl.utils.colorToInt(clientColor);
-        frame.pixels[realNumber] = clientColor;
-        */
-        checkClientRow = data.pixels.row;
-        checkClientCol = data.pixels.col;
-})
-socket.on('penSmallData', function(data) { //Drawing client sketch
-  console.log(data);
-  frame.setPixel(data.pixels[0].col, data.pixels[0].row, data.color);
-  frame.setPixel(data.pixels[1].col, data.pixels[1].row, data.color);
-  frame.setPixel(data.pixels[2].col, data.pixels[2].row, data.color);
-  frame.setPixel(data.pixels[3].col, data.pixels[3].row, data.color); 
-})
-} else {}
+   
    
 
     overlay.setPixel(col, row, color); //Apply the pixel to the overlay. This does not actually do anything. We view it but it won't last.
@@ -113,7 +88,6 @@ socket.on('penSmallData', function(data) { //Drawing client sketch
       row : row,
       color : color
     });
-      beenThrough = true;
      // console.log(this.pixels)
       
    //   var data = {pixels: this.pixels.slice(-1)[0], color: color} //A data packet with most of the required data. What we can't send we do there. Mainly anything that uses "this"
@@ -216,5 +190,32 @@ this.resetUsedPixels_();
   ns.SimplePen.prototype.resetUsedPixels_ = function() { //helps with undoing stuff
     this.pixels = [];
   };
+
+  ns.SimplePen.prototype.socketIO = function() { //handles simplepen client drawing.
+    socket.on('frameUpdate', function(data) { //Drawing client sketch
+      console.log('Placing Client Pixels');
+     // frame.setPixel(data.pixels.col, data.pixels.row, data.color)
+     pskl.app.corePiskelController.piskel.layers[`${data.location.layer}`].frames[`${data.location.frame}`].setPixel(data.pixels.col, data.pixels.row, data.color)
+      /*
+      var width = frame.width;
+      var multiplier = data.pixels[i].row * width; //Y value times the width
+      var realNumber = multiplier + data.pixels[i].col// plus the x
+      console.log('Client pixel at ' + realNumber);
+      clientColor = data.color
+      clientColor = pskl.utils.colorToInt(clientColor);
+      frame.pixels[realNumber] = clientColor;
+      */
+      checkClientRow = data.pixels.row;
+      checkClientCol = data.pixels.col;
+})
+
+socket.on('penSmallData', function(data) { //Drawing client sketch. Current bugged.
+  console.log(data);
+  frame.setPixel(data.pixels[0].col, data.pixels[0].row, data.color);
+  frame.setPixel(data.pixels[1].col, data.pixels[1].row, data.color);
+  frame.setPixel(data.pixels[2].col, data.pixels[2].row, data.color);
+  frame.setPixel(data.pixels[3].col, data.pixels[3].row, data.color); 
+})
+  }
   
 })();
