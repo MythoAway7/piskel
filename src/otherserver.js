@@ -96,8 +96,8 @@ var totalusers = 0;
 var aNume = 0; //Logs total actions sent to server. 
 var penSmall = 0; //Pensmall actions
 var penSmallData = []; //pensmall data. We store up to 4 pixels and then wipe it.
-var layerActions;
-var frameActions;
+var layerActions = 0;
+var frameActions = 0;
 var logs = {};
 // Create more if needed.
 
@@ -294,7 +294,24 @@ setInterval(function(){
   }
   let data = JSON.stringify(logs)
   fs.writeFileSync('student-2.json', data);
-}, 20000);
+}, 300000);
+
+setInterval(function(){
+  var today = new Date();
+  var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  logs = {
+    message: "These are updated every 15 minutes. These stats help me to identify usage for the average user.",
+    frameActions: frameActions,
+    layerActions: layerActions,
+    pixelActions: aNume,
+    activeUsers: serverList1,
+    activeUserCount: serverCount1,
+    totalUsers: totalusers,
+    time: time
+  }
+  let data = JSON.stringify(logs);
+  console.log(data);
+}, 60000);
 
 
 
