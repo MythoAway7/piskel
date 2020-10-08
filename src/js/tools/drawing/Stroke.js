@@ -73,7 +73,9 @@
 
     // The user released the tool to draw a line. We will compute the pixel coordinate, impact
     // the model and draw them in the drawing canvas (not the fake overlay anymore)
-    this.draw_(col, row, color, frame, penSize, isStraight);
+    var forclient = true;
+    //Ensures the overlay isn't sent. Overlay is NOT sent when we release so I work from that.
+    this.draw_(col, row, color, frame, penSize, isStraight, forclient);
 
     // For now, we are done with the stroke tool and don't need an overlay anymore:
     overlay.clear();
@@ -89,14 +91,48 @@
     });
   };
 
-  ns.Stroke.prototype.draw_ = function (col, row, color, targetFrame, penSize, isStraight) {
+  ns.Stroke.prototype.draw_ = function (col, row, color, targetFrame, penSize, isStraight, forclient) {
+
     var linePixels;
     if (isStraight) {
       linePixels = pskl.PixelUtils.getUniformLinePixels(this.startCol, col, this.startRow, row);
     } else {
       linePixels = pskl.PixelUtils.getLinePixels(col, this.startCol, row, this.startRow);
     }
+    if (forclient == true) { //Ensures the overlay isn't sent.
+    var data = {col: col, row: row, color: color, targetLayer: pskl.app.corePiskelController.getCurrentLayerIndex(), targetFrame: pskl.app.corePiskelController.getCurrentFrameIndex(), penSize: penSize, isStraight: isStraight, linePixels: linePixels}
+    socket.emit("strokeTool", data)
+    }
 
+    //draw the square ends of the line
+    pskl.PixelUtils.resizePixel(linePixels[0].col, linePixels[0].row, penSize)
+      .forEach(function (point) {targetFrame.setPixel(point[0], point[1], color);});
+    pskl.PixelUtils.resizePixel(linePixels[linePixels.length - 1].col, linePixels[linePixels.length - 1].row, penSize)
+      .forEach(function (point) {targetFrame.setPixel(point[0], point[1],color);});
+
+    //for each step along the line, draw an x centered on that pixel of size penSize
+    linePixels.forEach(function (point) {
+      for (var i = 0; i < penSize; i++) {
+        targetFrame.setPixel(
+          point.col - Math.floor(penSize / 2) + i, point.row - Math.floor(penSize / 2) + i, color
+        );
+        targetFrame.setPixel(
+          point.col - Math.floor(penSize / 2) + i, point.row + Math.ceil(penSize / 2) - i - 1, color
+        );
+        //draw an additional x directly next to the first to prevent unwanted dithering
+        if (i !== 0) {
+          targetFrame.setPixel(
+            point.col - Math.floor(penSize / 2) + i, point.row - Math.floor(penSize / 2) + i - 1, color
+          );
+          targetFrame.setPixel(
+            point.col - Math.floor(penSize / 2) + i, point.row + Math.ceil(penSize / 2) - i, color
+          );
+        }
+      }
+    });
+  };
+
+  ns.Stroke.prototype.draw_Socket = function (col, row, color, targetFrame, penSize, isStraight, linePixels) {
     //draw the square ends of the line
     pskl.PixelUtils.resizePixel(linePixels[0].col, linePixels[0].row, penSize)
       .forEach(function (point) {targetFrame.setPixel(point[0], point[1], color);});
@@ -130,5 +166,13 @@
     this.startRow = replayData.startRow;
     this.draw_(replayData.col, replayData.row, replayData.color, frame, replayData.penSize, replayData.isStraight);
   };
+
+  ns.Stroke.prototype.socketIO = function() {
+    socket.on("strokeToolClient", function (data) {
+      console.log("Stroke From Client.");
+      pskl.tools.drawing.Stroke.prototype.draw_Socket(data.col, data.row, data.color, pskl.app.corePiskelController.piskel.layers[`${data.targetLayer}`].frames[`${data.targetFrame}`], data.penSize, data.isStraight, data.linePixels);
+    })
+    console.log("Stroke socket is ready.");
+  }
 
 })();

@@ -102,20 +102,20 @@ var logs = {};
 // Create more if needed.
 
 io.on('connection', socket => {
-    console.log("A client is connecting...");
+    console.log('\x1b[36m%s\x1b[0m', "A client is connecting...");
     socket.emit("ping"); //ping pong
   socket.on("nameClaim", serverName => { //handles name claims per session. They are reset each session.
     console.log("A user is trying to claim a name.");
     if (serverName == "Mytho") {console.log("Someone very special tried to join :)")} //:)
     for (i = 0; i < serverList1.length; i++) {
       if (serverList1[i] == serverName) { //The name exists already
-        console.log('A user requested a name that has already been taken. Retrying...');
+        console.log("\x1b[31m%s\x1b[0m", 'A user requested a name that has already been taken. Retrying...');
         socket.emit("retryName", ""); //Ask the user to retry
         break; //End the loop
       } else if (serverList1[i] !== serverName && i == serverList1.length - 1) { //new Name!
            serverList1.push(serverName); //Add the name to the array
            socket.emit("successName", "");// it worked
-           console.log(`${serverName} has joined server 1.`); //Tell the server
+           console.log("\x1b[35m%s\x1b[0m",`${serverName} has joined server 1.`); //Tell the server
            serverCount1 = serverCount1 + 1;
            totalusers = totalusers + 1;
            break;
@@ -178,8 +178,14 @@ io.on('connection', socket => {
 
   // Paint Bucket
   socket.on("paintBucket", (data) => {
-    console.log(`Paint Bucket used. ${data}`);
+    console.log("\x1b[33m%s\x1b[0m", `Paint Bucket used. ${data}`);
     socket.broadcast.emit("paintBucketClient", data);
+  })
+
+  //Stroke Tool
+  socket.on("strokeTool", (data) => {
+    console.log("\x1b[33m%s\x1b[0m", `Stroke Tool used. ${data}`);
+    socket.broadcast.emit("strokeToolClient", data);
   })
 
 
@@ -318,13 +324,13 @@ setInterval(function(){
   }
   let data = JSON.stringify(logs);
   console.log(data);
-}, 60000);
+}, 150000);
 
 
 
 http.listen(3000, () => {
   console.log('Starting Server http://YOURLOCALIPADDRESS:3000');
   setTimeout(() => {
-    console.log("Clients can start connecting.")
+    console.log('\x1b[36m%s\x1b[0m', "Clients can start connecting.");
   }, 2000);
 });

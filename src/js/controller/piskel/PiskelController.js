@@ -33,7 +33,7 @@
   ns.PiskelController.prototype.socketIO = function() { //A function that is ran when socket.io connects. Most client handlers are here.
     pskl.tools.drawing.SimplePen.prototype.socketIO(); //Runs the simple pen client.
     pskl.tools.drawing.PaintBucket.prototype.socketIO() //Runs the paint bucket client
-    
+    pskl.tools.drawing.Stroke.prototype.socketIO() //Runs the stroke client    
 
     socket.on("createLayer", function (data) { //A client creates a layer.
       console.log('Layer from client.');
