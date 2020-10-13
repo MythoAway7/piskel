@@ -46,7 +46,7 @@
   ns.ColorSwap.prototype.swapColors_ = function(oldColor, newColor, allLayers, allFrames) {
     var currentFrameIndex = pskl.app.piskelController.getCurrentFrameIndex();
     var layers = allLayers ? pskl.app.piskelController.getLayers() : [pskl.app.piskelController.getCurrentLayer()];
-    var data = {oldColor: oldColor, newColor: newColor, allLayers: allLayers, allFrames: allFrames}
+    var data = {oldColor: oldColor, newColor: newColor, allLayers: allLayers, allFrames: allFrames, currentFrameIndex: pskl.app.corePiskelController.getCurrentFrameIndex()}
     socket.emit("colorSwap", data);
     layers.forEach(function (layer) {
       var frames = allFrames ? layer.getFrames() : [layer.getFrameAt(currentFrameIndex)];
@@ -78,7 +78,7 @@
       if (data.allLayers == true) { //Apply to all layers.
         var layers = pskl.app.piskelController.getLayers()
         layers.forEach(function (layer) {
-          var frames = data.allFrames ? layer.getFrames() : [layer.getFrameAt(pskl.app.corePiskelController.getCurrentFrameIndex())];
+          var frames = data.allFrames ? layer.getFrames() : [layer.getFrameAt(data.currentFrameIndex)]; //check if it is All Frames or just one
           frames.forEach(function (frame) {
             frame.forEachPixel(function (color, col, row) {
               if (color !== null && color == oldColor) {
@@ -88,9 +88,9 @@
             
           })
           })
-      } else {
+      } else { //Apply to one layer
         var layer = pskl.app.piskelController.getCurrentLayer();
-          var frames = data.allFrames ? layer.getFrames() : [layer.getFrameAt(pskl.app.corePiskelController.getCurrentFrameIndex())];
+          var frames = data.allFrames ? layer.getFrames() : [layer.getFrameAt(data.currentFrameIndex)]; //Check if it is All Frames or just one
           frames.forEach(function (frame) {
             frame.forEachPixel(function (color, col, row) {
               if (color !== null && color == oldColor) {
