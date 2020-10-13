@@ -209,13 +209,16 @@ this.resetUsedPixels_();
       checkClientCol = data.pixels.col;
 })
 
-socket.on('penSmallData', function(data) { //Drawing client sketch. Current bugged.
-  console.log(data);
-  frame.setPixel(data.pixels[0].col, data.pixels[0].row, data.color);
-  frame.setPixel(data.pixels[1].col, data.pixels[1].row, data.color);
-  frame.setPixel(data.pixels[2].col, data.pixels[2].row, data.color);
-  frame.setPixel(data.pixels[3].col, data.pixels[3].row, data.color); 
+    socket.on('penSmallData', function(data) { //Drawing client sketch. Current bugged.
+     console.log(data);
+     frame.setPixel(data.pixels[0].col, data.pixels[0].row, data.color);
+     frame.setPixel(data.pixels[1].col, data.pixels[1].row, data.color);
+     frame.setPixel(data.pixels[2].col, data.pixels[2].row, data.color);
+     frame.setPixel(data.pixels[3].col, data.pixels[3].row, data.color); 
 })
+     
+     console.log("SimplePen socket is ready!");
+  
   }
   
 })();

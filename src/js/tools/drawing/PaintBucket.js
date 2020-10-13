@@ -38,5 +38,6 @@
       console.log("Paint bucket tool used by client.");
       pskl.PixelUtils.paintSimilarConnectedPixelsFromFrame(pskl.app.corePiskelController.piskel.layers[`${data.layerIndex}`].frames[`${data.frameIndex}`], data.col, data.row, data.color);
     })
+     console.log("Paint Bucket socket is ready.");
   };
 })();
