@@ -72,8 +72,6 @@
 
   ns.SimplePen.prototype.draw = function(color, col, row, frame, overlay, penSize) {
    
-   
-
     overlay.setPixel(col, row, color); //Apply the pixel to the overlay. This does not actually do anything. We view it but it won't last.
     if (color === Constants.TRANSPARENT_COLOR) {
       frame.setPixel(col, row, color);//Handles transparent pixels. Possibly the eraser as it works from my changes.
@@ -189,6 +187,11 @@ this.resetUsedPixels_();
 
   ns.SimplePen.prototype.resetUsedPixels_ = function() { //helps with undoing stuff
     this.pixels = [];
+  };
+
+  ns.SimplePen.prototype.dither = function(ditheringColor, col, row, frame, layer) {
+    var frame = pskl.app.corePiskelController.piskel.layers[`${layer}`].frames[`${frame}`]
+      frame.setPixel(col, row, ditheringColor);   
   };
 
   ns.SimplePen.prototype.socketIO = function() { //handles simplepen client drawing.

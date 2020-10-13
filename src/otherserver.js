@@ -194,6 +194,12 @@ io.on('connection', socket => {
     socket.broadcast.emit("colorSwapClient", data);
   })
 
+  //Dithering Tool
+  socket.on("ditheringTool", (data) => {
+    console.log("\x1b[33m%s\x1b[0m", `Dithering tool used. ${data.col, data.row, data.ditheringColor}`);
+    socket.broadcast.emit("ditheringToolClient", data);
+  })
+
 
 //Start of layer events
   socket.on("addLayer", (layer) => {

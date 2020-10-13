@@ -45,6 +45,15 @@
       pskl.app.selectedColorsService.getSecondaryColor();
 
     this.draw(ditheringColor, col, row, frame, overlay);
+    var data = {color: ditheringColor, col: col, row: row, frame: pskl.app.corePiskelController.getCurrentFrameIndex(), layer: pskl.app.corePiskelController.getCurrentLayerIndex()};
+    socket.emit("ditheringTool", data);
+  };
+
+  ns.DitheringTool.prototype.socketIO = function() {
+    socket.on("ditheringToolClient", function(data) {
+      pskl.tools.drawing.DitheringTool.prototype.dither(data.color, data.col, data.row, data.frame, data.layer) //We dither from the simplePen file instead of here.
+    })
+    console.log("Dithering Socket ready.")
   };
 
 })();

@@ -34,7 +34,8 @@
     pskl.tools.drawing.SimplePen.prototype.socketIO(); //Runs the simple pen client.
     pskl.tools.drawing.PaintBucket.prototype.socketIO(); //Runs the paint bucket client
     pskl.tools.drawing.Stroke.prototype.socketIO(); //Runs the stroke client
-    pskl.tools.drawing.ColorSwap.prototype.socketIO();
+    pskl.tools.drawing.ColorSwap.prototype.socketIO();//Runs the colow swap client
+    pskl.tools.drawing.DitheringTool.prototype.socketIO();//Runs the dithering tool client
 
     socket.on("createLayer", function (data) { //A client creates a layer.
       console.log('Layer from client.');
