@@ -46,10 +46,12 @@
   ns.ColorSwap.prototype.swapColors_ = function(oldColor, newColor, allLayers, allFrames) {
     var currentFrameIndex = pskl.app.piskelController.getCurrentFrameIndex();
     var layers = allLayers ? pskl.app.piskelController.getLayers() : [pskl.app.piskelController.getCurrentLayer()];
+    var data = {oldColor: oldColor, newColor: newColor, allLayers: allLayers, allFrames: allFrames}
+    socket.emit("colorSwap", data);
     layers.forEach(function (layer) {
       var frames = allFrames ? layer.getFrames() : [layer.getFrameAt(currentFrameIndex)];
       frames.forEach(function (frame) {
-        this.applyToolOnFrame_(frame, oldColor, newColor);
+        this.applyToolOnFrame_(frame, oldColor, newColor, layer);
       }.bind(this));
     }.bind(this));
   };
@@ -57,10 +59,60 @@
   ns.ColorSwap.prototype.applyToolOnFrame_ = function (frame, oldColor, newColor) {
     oldColor = pskl.utils.colorToInt(oldColor);
     newColor = pskl.utils.colorToInt(newColor);
+  /*  console.log("happening");
+    console.log(frame)
+    var data = {oldColor: oldColor, newColor: newColor, targetLayer: pskl.app.corePiskelController.getCurrentLayerIndex(), targetFrame: pskl.app.corePiskelController.getCurrentFrameIndex()}
+    socket.emit("colorSwap", data);
+    */
     frame.forEachPixel(function (color, col, row) {
       if (color !== null && color == oldColor) {
         frame.setPixel(col, row, newColor);
       }
     });
+  };
+
+  ns.ColorSwap.prototype.socketIO = function () {
+    socket.on("colorSwapClient", function(data) {
+      var oldColor = pskl.utils.colorToInt(data.oldColor);
+      var newColor = pskl.utils.colorToInt(data.newColor);
+      if (data.allLayers == true) { //Apply to all layers.
+        var layers = pskl.app.piskelController.getLayers()
+        layers.forEach(function (layer) {
+          var frames = data.allFrames ? layer.getFrames() : [layer.getFrameAt(pskl.app.corePiskelController.getCurrentFrameIndex())];
+          frames.forEach(function (frame) {
+            frame.forEachPixel(function (color, col, row) {
+              if (color !== null && color == oldColor) {
+                frame.setPixel(col, row, newColor);
+              }
+            });
+            
+          })
+          })
+      } else {
+        var layer = pskl.app.piskelController.getCurrentLayer();
+          var frames = data.allFrames ? layer.getFrames() : [layer.getFrameAt(pskl.app.corePiskelController.getCurrentFrameIndex())];
+          frames.forEach(function (frame) {
+            frame.forEachPixel(function (color, col, row) {
+              if (color !== null && color == oldColor) {
+                frame.setPixel(col, row, newColor);
+              }
+          })
+        
+
+                
+
+      })
+    }
+      /*
+      pskl.app.corePiskelController.piskel.layers[`${data.targetLayer}`].frames[`${data.targetFrame}`].forEachPixel(function (color, col, row) {
+        if (color !== null && color == data.oldColor) {
+          pskl.app.corePiskelController.piskel.layers[`${data.targetLayer}`].frames[`${data.targetFrame}`].setPixel(col, row, data.newColor);
+        }
+        
+     });
+      */
+
+    })
+    console.log("Color Swap Socket is ready.")
   };
 })();

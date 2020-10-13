@@ -188,6 +188,12 @@ io.on('connection', socket => {
     socket.broadcast.emit("strokeToolClient", data);
   })
 
+  //Color Swap (Replace pixels with a color)
+  socket.on("colorSwap", (data) => {
+    console.log("\x1b[33m%s\x1b[0m", `Color swap used. ${data}`);
+    socket.broadcast.emit("colorSwapClient", data);
+  })
+
 
 //Start of layer events
   socket.on("addLayer", (layer) => {
