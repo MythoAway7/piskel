@@ -200,6 +200,12 @@ io.on('connection', socket => {
     socket.broadcast.emit("ditheringToolClient", data);
   })
 
+  //Lighten and Darken Tool
+  socket.on("contrastTool", (data) => {
+    console.log("\x1b[33m%s\x1b[0m", `Dithering tool used. ${data.col, data.row}`);
+    socket.broadcast.emit("contrastToolClient", data);
+  })
+
 
 //Start of layer events
   socket.on("addLayer", (layer) => {

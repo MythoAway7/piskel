@@ -35,6 +35,8 @@
     points.forEach(function (point) {
       var modifiedColor = this.getModifiedColor_(point[0], point[1], frame, overlay, event);
       this.draw(modifiedColor, point[0], point[1], frame, overlay);
+      var data = {color: modifiedColor, point1: point[0], point2: point[1], frame: pskl.app.corePiskelController.getCurrentFrameIndex(), layer: pskl.app.corePiskelController.getCurrentLayerIndex()}
+      socket.emit("contrastTool", data)
     }.bind(this));
   };
 
@@ -68,5 +70,18 @@
 
     // Convert tinycolor color to string format.
     return color.toHexString();
+  };
+
+  ns.Lighten.prototype.DrawLightenOrDarken = function(color, point1, point2, frame, layer) {
+    var frame = pskl.app.corePiskelController.piskel.layers[`${layer}`].frames[`${frame}`]
+    frame.setPixel(point1, point2, color);   
+  }
+
+  ns.Lighten.prototype.socketIO = function() {
+    socket.on("contrastToolClient", function(data) {
+      pskl.tools.drawing.Lighten.prototype.DrawLightenOrDarken(data.color, data.point1, data.point2, data.frame, data.layer);
+
+  })
+  console.log("Contrast Socket Ready (Lighten/Darken)");
   };
 })();
