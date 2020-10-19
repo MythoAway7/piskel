@@ -5,13 +5,19 @@
  */
 (function() {
   var ns = $.namespace('pskl.tools.drawing');
-
+ //This has been modified (more so than the normal tools)
+ //I had to pull functions from the shapetool file for performance reasons.The orignal functions on this file are still used for the local player.
+ //The client is sent the starting coordinates of the circle whenever the mosue is clicked by the host.
+ //When the mouse is released we send the last 2 coordinates and have the getcirclepixels_ function do the math to calculate the missing coordinates between.
+ //Finally, we draw the circle.
   ns.Circle = function() {
     ns.ShapeTool.call(this);
 
     this.toolId = 'tool-circle';
     this.helpText = 'Circle tool';
     this.shortcut = pskl.service.keyboard.Shortcuts.TOOL.CIRCLE;
+    this.startColClient = null;
+    this.startRowClient = null;
   };
 
   pskl.utils.inherit(ns.Circle, ns.ShapeTool);
@@ -19,13 +25,44 @@
   /**
    * @override
    */
-  ns.Circle.prototype.draw = function (col, row, color, targetFrame, penSize) {
+  ns.Circle.prototype.draw = function (col, row, color, targetFrame, penSize) { //The host runs this locally. Ran on mouse movement
     this.getCirclePixels_(this.startCol, this.startRow, col, row, penSize).forEach(function (point) {
       targetFrame.setPixel(point[0], point[1], color);
     });
   };
 
-  ns.Circle.prototype.getCirclePixels_ = function (x0, y0, x1, y1, penSize) {
+  ns.Circle.prototype.drawClient = function (col, row, color, penSize, targetFrame, layer) { //The client uses this to draw.
+    pskl.tools.drawing.Circle.prototype.getCirclePixels_(pskl.tools.drawing.Circle.startColClient, pskl.tools.drawing.Circle.startRowClient, col, row, penSize).forEach(function (point) {
+      pskl.app.corePiskelController.piskel.layers[`${layer}`].frames[`${targetFrame}`].setPixel(point[0], point[1], color)
+    });
+  };
+
+  ns.Circle.prototype.applyToolAt = function(col, row, frame, overlay, event) { //Ran when the tool is clicked. Sends clients the start of the circle
+    $.publish(Events.DRAG_START, [col, row]);
+    this.startCol = col;
+    this.startRow = row;
+    var penSize = pskl.app.penSizeService.getPenSize();
+    this.draw(col, row, this.getToolColor(), overlay, penSize);
+    var data = {col, row}
+    socket.emit("startCircle", data);
+  };
+
+  ns.ShapeTool.prototype.moveToolAt = function(col, row, frame, overlay, event) { //Ran when the tool is moved. I had to use this for the host. Maybe not. IDK. or care.
+    var coords = this.getCoordinates_(col, row, event);
+    $.publish(Events.CURSOR_MOVED, [coords.col, coords.row]);
+
+    overlay.clear();
+    var color = this.getToolColor();
+    if (color == Constants.TRANSPARENT_COLOR) {
+      color = Constants.SELECTION_TRANSPARENT_COLOR;
+    }
+
+    // draw in overlay
+    var penSize = pskl.app.penSizeService.getPenSize();
+    this.draw(coords.col, coords.row, color, overlay, penSize);
+  };
+
+  ns.Circle.prototype.getCirclePixels_ = function (x0, y0, x1, y1, penSize) { //A complex math formula for getting the circle with 4 points. 2 are from the client ending the click and 2 are from starting the click.
 
     var coords = pskl.PixelUtils.getOrderedRectangleCoordinates(x0, y0, x1, y1);
     var pixels = [];
@@ -88,5 +125,37 @@
     }
 
     return pixels;
+  };
+  ns.Circle.prototype.releaseToolAt = function(col, row, frame, overlay, event) { //Rn when mouse is released. Sends the client the last 2 coords
+    overlay.clear();
+    var coords = this.getCoordinates_(col, row, event);
+    var color = this.getToolColor();
+    var penSize = pskl.app.penSizeService.getPenSize();
+    this.draw(coords.col, coords.row, color, frame, penSize);
+
+    $.publish(Events.DRAG_END);
+    this.raiseSaveStateEvent({
+      col : coords.col,
+      row : coords.row,
+      startCol : this.startCol,
+      startRow : this.startRow,
+      color : color,
+      penSize : penSize
+    });
+    var data = {coords: coords, penSize: penSize, targetFrame: pskl.app.corePiskelController.getCurrentFrameIndex(), layer: pskl.app.corePiskelController.getCurrentLayerIndex(), color: color};
+    socket.emit("circleTool", data);
+  };
+
+  ns.Circle.prototype.socketIO = function() {
+    socket.on("circleToolClient", function(data) { //Draws the circle
+      pskl.tools.drawing.Circle.prototype.drawClient(data.coords.col, data.coords.row, data.color, data.penSize, data.targetFrame, data.layer);
+  })
+
+  socket.on("startCircleClient", function(data) { //updates the starting coords for the circle
+    console.log('Updating Circle starting coords');
+    pskl.tools.drawing.Circle.startColClient = data.col;
+    pskl.tools.drawing.Circle.startRowClient = data.row;
+})
+  console.log("Circle Socket Ready.");
   };
 })();

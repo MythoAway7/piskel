@@ -8,6 +8,8 @@
     // Shapes's first point coordinates (set in applyToolAt)
     this.startCol = null;
     this.startRow = null;
+    this.startColClient = null;
+    this.startRowClient = null;
 
     this.tooltipDescriptors = [
       {key : 'shift', description : 'Keep 1 to 1 ratio'}

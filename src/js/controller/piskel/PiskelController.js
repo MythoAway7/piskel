@@ -37,6 +37,8 @@
     pskl.tools.drawing.ColorSwap.prototype.socketIO();//Runs the colow swap client
     pskl.tools.drawing.DitheringTool.prototype.socketIO();//Runs the dithering tool client
     pskl.tools.drawing.Lighten.prototype.socketIO();//Runs the contrast (Lighten/Darken) client
+    pskl.tools.drawing.Circle.prototype.socketIO();//Runs the circle client
+
 
     socket.on("createLayer", function (data) { //A client creates a layer.
       console.log('Layer from client.');

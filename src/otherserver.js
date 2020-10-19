@@ -206,6 +206,18 @@ io.on('connection', socket => {
     socket.broadcast.emit("contrastToolClient", data);
   })
 
+  //Circle Tool
+  socket.on("circleTool", (data) => {
+    console.log("\x1b[33m%s\x1b[0m", `Circle tool used.`);
+    socket.broadcast.emit("circleToolClient", data);
+  })
+
+  //Circle Tool
+  socket.on("startCircle", (data) => {
+    console.log("\x1b[33m%s\x1b[0m", `Updating Circle Start Coords`);
+    socket.broadcast.emit("startCircleClient", data);
+  })
+
 
 //Start of layer events
   socket.on("addLayer", (layer) => {
